@@ -1,2 +1,9 @@
 package com.example.firebase.viewmodel
 
+import com.example.firebase.modeldata.Siswa
+
+sealed interface StatusUIDetail {
+    data class Success(val satusiswa: Siswa?) : StatusUIDetail
+
+}
+
