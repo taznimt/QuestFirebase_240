@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.example.firebase.modeldata.Siswa
 import com.example.firebase.repositori.RepositorySiswa
+import com.example.firebase.view.route.DestinasiDetail
 
 sealed interface StatusUIDetail {
     data class Success(val satusiswa: Siswa?) : StatusUIDetail
@@ -15,6 +16,8 @@ sealed interface StatusUIDetail {
 class DetailViewModel(savedStateHandle: SavedStateHandle, private val repositorySiswa:
 RepositorySiswa
 ): ViewModel() {
-
+    private val idSiswa: Long =
+        savedStateHandle.get<String>(DestinasiDetail.itemIdArg)?.toLong()
+            ?: error("idSiswa tidak ditemukan di SavedStateHandle")
 }
 
