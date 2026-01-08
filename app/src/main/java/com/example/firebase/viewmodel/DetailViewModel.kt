@@ -10,6 +10,7 @@ import com.example.firebase.modeldata.Siswa
 import com.example.firebase.repositori.RepositorySiswa
 import com.example.firebase.view.route.DestinasiDetail
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 sealed interface StatusUIDetail {
     data class Success(val satusiswa: Siswa?) : StatusUIDetail
@@ -38,6 +39,11 @@ RepositorySiswa
             statusUIDetail = try {
                 StatusUIDetail.Success(satusiswa = repositorySiswa.getSatuSiswa(idSiswa) )
             }
-    }
+            catch (e: IOException){
+                StatusUIDetail.Error
+            }
+
+        }
+
 }
 
