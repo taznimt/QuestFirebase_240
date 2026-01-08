@@ -9,6 +9,10 @@ import kotlin.text.toLong
 interface RepositorySiswa {
     suspend fun getDataSiswa(): List<Siswa>
     suspend fun postDataSiswa(siswa: Siswa)
+
+    suspend fun getSatuSiswa(id: Long): Siswa?
+    suspend fun editSatuSiswa(id: Long, siswa: Siswa)
+    suspend fun hapusSatuSiswa(id: Long)
 }
 class FirebaseRepositorySiswa: RepositorySiswa{
     private val db = FirebaseFirestore.getInstance()
@@ -32,23 +36,22 @@ class FirebaseRepositorySiswa: RepositorySiswa{
     override suspend fun postDataSiswa(siswa: Siswa) {
         val docRef = if (siswa.id==0L) collection.document() else collection.document(siswa.id.toString())
         val data = hashMapOf(
-            "id" to (siswa.id.takeIf { it != 0L }?: docRef.id.hashCode()),
+            "id" to (siswa.id.takeIf { it != 0L }?: docRef.id.hashCode().toLong()),
             "nama" to siswa.nama,
             "alamat" to siswa.alamat,
             "telpon" to siswa.telpon
         )
         docRef.set(data).await()
     }
-    override suspend fun getSatuSiswa(id: Long):Siswa? {
-        return try{
-            val query = collection.whereEqualTo(field = "id", value = id).get().await()
+    override suspend fun getSatuSiswa(id: Long): Siswa? {
+        return try {
+            val query = collection.whereEqualTo("id", id).get().await()
             query.documents.firstOrNull()?.let { doc ->
                 Siswa(
-                    id = doc.getLong(field="id")?.toLong() ?: 0,
-                    nama = doc.getString(field="nama")?: "",
-                    alamat = doc.getString(field="alamat")?: "",
-                    telpon = doc.getString(field="telpon")?: ""
-
+                    id = doc.getLong("id") ?: 0L,
+                    nama = doc.getString("nama") ?: "",
+                    alamat = doc.getString("alamat") ?: "",
+                    telpon = doc.getString("telpon") ?: ""
                 )
             }
         } catch (e: Exception) {
@@ -56,10 +59,11 @@ class FirebaseRepositorySiswa: RepositorySiswa{
             null
         }
     }
-    override suspend fun editSatuSiswa(id : Long , siswa:Siswa) {
-        val docQuery = collection.whereEqualTo(field= "id", value = id).get().await()
-        val docId = docQuery.documents.firstOrNull()?.id?:return
-        collection.document(documentPath = docId).set(
+    override suspend fun editSatuSiswa(id: Long, siswa: Siswa) {
+        val docQuery = collection.whereEqualTo("id", id).get().await()
+        val docId = docQuery.documents.firstOrNull()?.id ?: return
+
+        collection.document(docId).set(
             mapOf(
                 "id" to siswa.id,
                 "nama" to siswa.nama,
@@ -68,9 +72,10 @@ class FirebaseRepositorySiswa: RepositorySiswa{
             )
         ).await()
     }
-    override suspend fun hapusSatuuSiswa(id : Long) {
-        val docQuery = collection.whereEqualTo(field = "id", value = id).get().await()
-        val docId - docQuery.documents.firstOrNull()?.id? : return
+
+    override suspend fun hapusSatuSiswa(id: Long) {
+        val docQuery = collection.whereEqualTo("id", id).get().await()
+        val docId = docQuery.documents.firstOrNull()?.id ?: return
         collection.document(docId).delete().await()
     }
 }

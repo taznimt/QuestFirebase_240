@@ -10,13 +10,13 @@ import com.example.firebase.repositori.RepositorySiswa
 import kotlinx.coroutines.launch
 import java.io.IOException
 
-sealed interface StatusUiSiswa{
-    data class Success(val siswa: List<Siswa> = listOf()): StatusUiSiswa
-    object Error: StatusUiSiswa
-    object Loading: StatusUiSiswa
+sealed interface StatusUiSiswa {
+    data class Success(val siswa: List<Siswa>) : StatusUiSiswa // Lepas default value agar lebih pasti
+    object Error : StatusUiSiswa
+    object Loading : StatusUiSiswa
 }
 
-class HomeViewModel(private val repositorySiswa: RepositorySiswa): ViewModel(){
+class HomeViewModel(private val repositorySiswa: RepositorySiswa) : ViewModel() {
     var statusUiSiswa: StatusUiSiswa by mutableStateOf(StatusUiSiswa.Loading)
         private set
 
@@ -24,17 +24,19 @@ class HomeViewModel(private val repositorySiswa: RepositorySiswa): ViewModel(){
         loadSiswa()
     }
 
-    fun loadSiswa(){
+    fun loadSiswa() {
         viewModelScope.launch {
             statusUiSiswa = StatusUiSiswa.Loading
-            statusUiSiswa = try {
-                StatusUiSiswa.Success(repositorySiswa.getDataSiswa())
-            }catch (e: IOException){
-                StatusUiSiswa.Error
-            }catch (e: Exception){
-                StatusUiSiswa.Error
+            try {
+                // Ambil data terlebih dahulu
+                val dataSiswa = repositorySiswa.getDataSiswa()
+                // Update state dengan data yang didapat
+                statusUiSiswa = StatusUiSiswa.Success(dataSiswa)
+            } catch (e: IOException) {
+                statusUiSiswa = StatusUiSiswa.Error
+            } catch (e: Exception) {
+                statusUiSiswa = StatusUiSiswa.Error
             }
         }
     }
-
 }

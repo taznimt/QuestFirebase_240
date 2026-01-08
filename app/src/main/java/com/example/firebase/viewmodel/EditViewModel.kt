@@ -9,8 +9,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.firebase.modeldata.DetailSiswa
 import com.example.firebase.modeldata.UIStateSiswa
 import com.example.firebase.modeldata.toDataSiswa
+import com.example.firebase.modeldata.toUiStateSiswa
 import com.example.firebase.repositori.RepositorySiswa
 import com.example.firebase.view.route.DestinasiDetail
+import kotlinx.coroutines.launch
 
 class EditViewModel(savedStateHandle: SavedStateHandle, private val repositorySiswa:
 RepositorySiswa

@@ -1,5 +1,6 @@
 package com.example.firebase.view
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +29,7 @@ import com.example.firebase.modeldata.DetailSiswa
 import com.example.firebase.modeldata.UIStateSiswa
 import com.example.firebase.view.route.DestinasiEntry
 import com.example.firebase.viewmodel.EntryViewModel
+import com.example.firebase.viewmodel.PenyediaViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,15 +51,19 @@ fun EntrySiswaScreen(
                 scrollBehavior = scrollBehavior
             )
         }
-    ) { innerPadding ->
-
+    ){ innerPadding ->
         EntrySiswaBody(
             uiStateSiswa = viewModel.uiStateSiswa,
             onSiswaValueChange = viewModel::updateUiState,
             onSaveClick = {
                 coroutineScope.launch {
-                    viewModel.addSiswa()
-                    navigateBack()
+                    try {
+                        viewModel.addSiswa() // Pastikan ini tidak error
+                        navigateBack()       // Hanya pindah jika berhasil
+                    } catch (e: Exception) {
+                        // Tampilkan error di Logcat untuk tahu penyebab aslinya
+                        Log.e("FirebaseError", "Gagal simpan: ${e.message}")
+                    }
                 }
             },
             modifier = Modifier
