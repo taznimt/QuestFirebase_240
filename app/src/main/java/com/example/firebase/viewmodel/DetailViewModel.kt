@@ -42,7 +42,9 @@ RepositorySiswa
             catch (e: IOException){
                 StatusUIDetail.Error
             }
-
+            catch (e: Exception){
+                StatusUIDetail.Error
+            }
         }
 
 }
