@@ -3,6 +3,8 @@ package com.example.firebase.repositori
 import com.example.firebase.modeldata.Siswa
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import kotlin.text.get
+import kotlin.text.toLong
 
 interface RepositorySiswa {
     suspend fun getDataSiswa(): List<Siswa>
@@ -14,15 +16,16 @@ class FirebaseRepositorySiswa: RepositorySiswa{
 
     override suspend fun getDataSiswa(): List<Siswa> {
         return try {
-            collection.get().await().documents.map{ doc ->
+            collection.get().await().documents.map { doc ->
                 Siswa(
-                    id = doc.getLong("id")?.toLong()?:0,
-                    nama = doc.getString("nama")?:"",
-                    alamat = doc.getString("alamat")?:"",
-                    telpon = doc.getString("telpon")?: ""
+                    // Gunakan id dari dokumen jika field "id" di dalam data kosong
+                    id = doc.getLong("id") ?: 0L,
+                    nama = doc.getString("nama") ?: "",
+                    alamat = doc.getString("alamat") ?: "",
+                    telpon = doc.getString("telpon") ?: ""
                 )
             }
-        }catch (e: Exception){
+        } catch (e: Exception) {
             emptyList()
         }
     }
@@ -36,4 +39,39 @@ class FirebaseRepositorySiswa: RepositorySiswa{
         )
         docRef.set(data).await()
     }
+    override suspend fun getSatuSiswa(id: Long):Siswa? {
+        return try{
+            val query = collection.whereEqualTo(field = "id", value = id).get().await()
+            query.documents.firstOrNull()?.let { doc ->
+                Siswa(
+                    id = doc.getLong(field="id")?.toLong() ?: 0,
+                    nama = doc.getString(field="nama")?: "",
+                    alamat = doc.getString(field="alamat")?: "",
+                    telpon = doc.getString(field="telpon")?: ""
+
+                )
+            }
+        } catch (e: Exception) {
+            println("Gagal baca data siswa: ${e.message}")
+            null
+        }
+    }
+    override suspend fun editSatuSiswa(id : Long , siswa:Siswa) {
+        val docQuery = collection.whereEqualTo(field= "id", value = id).get().await()
+        val docId = docQuery.documents.firstOrNull()?.id?:return
+        collection.document(documentPath = docId).set(
+            mapOf(
+                "id" to siswa.id,
+                "nama" to siswa.nama,
+                "alamat" to siswa.alamat,
+                "telpon" to siswa.telpon
+            )
+        ).await()
+    }
+    override suspend fun hapusSatuuSiswa(id : Long) {
+        val docQuery = collection.whereEqualTo(field = "id", value = id).get().await()
+        val docId - docQuery.documents.firstOrNull()?.id? : return
+        collection.document(docId).delete().await()
+    }
 }
+
